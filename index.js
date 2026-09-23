@@ -16,6 +16,18 @@ const app = express();
 // JSON bytes), so just buffer it as-is rather than parsing it.
 app.use(express.raw({ type: '*/*', limit: '25mb' }));
 
+// Log every request so the Render Logs tab shows what's actually
+// arriving — useful while debugging; harmless to leave in permanently.
+app.use((req, res, next) => {
+  console.log(req.method, req.originalUrl);
+  next();
+});
+
+// Lightweight wake-up check. Answers instantly once the server is
+// awake — used by a "wake up" button on the tool page so staff don't
+// have to wait through a cold start while actually using the real tool.
+app.get('/ping', (req, res) => res.send('ok'));
+
 app.use(async (req, res) => {
   const targetUrl = 'https://generativelanguage.googleapis.com' + req.originalUrl;
 
